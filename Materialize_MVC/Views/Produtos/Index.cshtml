@@ -1,0 +1,254 @@
+﻿@model IEnumerable<Trabalho4_MVC.Models.Produto>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link type="text/css" rel="stylesheet" href="~/Content/css/materialize.css" media="screen,projection" />
+    <link type="text/css" rel="stylesheet" href="~/Content/css/custom.css" media="screen,projection" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="~/Content/js/materialize.js"></script>
+    <script>
+        //Função generica utilizada para acionar as operações Creat/Edit/Delete via post
+        if (!window.sendPost) {
+            window.sendPost = function (url, obj) {
+                //Define o formulário
+                var myForm = document.createElement("form")
+                myForm.action = url
+                myForm.method = "post"
+                var ok = false
+                //Esse for esta percorrente o elemento Json
+                for (var key in obj) {
+                    var input = document.createElement("input");
+                    input.type = "hidden"
+                    input.value = obj[key]
+                    input.name = key
+                    //Valida todos os campos
+                    if (obj[key] == "") {
+                        M.toast({ html: "Por favor, prencha o campo " + key })
+                        ok = true
+                        break
+                    }
+                    myForm.appendChild(input);
+                }
+                if (!ok) {
+                    //Adiciona o form ao corpo do documento
+                    document.body.appendChild(myForm)
+                    //Envia o formulário
+                    myForm.submit()
+                }
+            }
+        }
+        
+        $(document).ready(function () {
+            $('.sidenav').sidenav();
+            $('.collapsible').collapsible();
+            $('.modal').modal({
+                dismissible: false,
+                opacity: 0.9
+            });
+            $('select').formSelect();
+        });
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="blue darken-2">
+            <div class="container">
+                <div class="nav-wrapper">
+                    <!-- Menu-->
+                    <img src="~/Content/img/img.png" width="62px" />
+                    <a href="#" data-target="menu-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                    <ul class="right hide-on-med-and-down">
+                        <li><a href="#">Produtos</a></li>
+                        <li><a href="/Categorias">Categorias</a></li>
+                        <li><a href="/Fabricantes">Fabricantes</a></li>
+                    </ul>
+                    <!-- Menu mobile-->
+                    <ul class="sidenav" id="menu-mobile">
+                        <li><a href="#">Produtos</a></li>
+                        <li><a href="/Categorias">Categorias</a></li>
+                        <li><a href="/Fabricantes">Fabricantes</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <!-- Conteudo-->
+    <main class="grey lighten-5">
+        <div class="row container">
+            <br />
+            <br />
+            <a class="waves-effect waves-light btn blue darken-2 modal-trigger" data-target="Modal-Creat">
+                <i class="material-icons right">add</i>Novo Produto
+            </a>
+            <!-- Modal Creat -->
+            <div id="Modal-Creat" class="modal">
+                <div class="modal-content row">
+                    <h4 class="grey-text text-darken-2">Novo Produto</h4>
+                    <br />
+                    <br />
+                    <form class="col s12" id="form">
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input id="CreateNome" value="" type="text" class="validate">
+                                <label for="Nome">Nome do Produto</label>
+                            </div>
+                        </div>
+                        <div class="row green-text text-accent-4">
+                            <div class="input-field col s6">
+                                <select  id="CreateCat" class="validate">
+                                    <option value="" disabled selected>Selecione a opção</option>
+                                    @foreach (var item in (List<Trabalho4_MVC.Models.Categoria>)@ViewBag.Categoria)
+                                    {
+                                        <option value="@item.CategoriaId">@item.Nome</option>
+                                    }
+                                </select>
+                                <label>Selecione</label>
+                            </div>
+                            <div class="input-field col s6">
+                                <select id="CreateFab" class="validate">
+                                    <option value=""  disabled selected>Selecione a opção</option>
+                                    @foreach (var item in (List<Trabalho4_MVC.Models.Fabricante>)@ViewBag.Fabricante)
+                                    {
+                                        <option value="@item.FabricanteID">@item.Nome</option>
+                                    }
+                                </select>
+                                <label>Selecione</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="divider"></div>
+                <div class="modal-footer">
+                    <button class="modal-action modal-close red waves-effect waves-light btn"><i class="material-icons left">cancel</i>Cancelar</button>
+                    <button onclick="sendPost('/Produtos/Create', { NOME: document.getElementById('CreateNome').value, CATEGORIA: document.getElementById('CreateCat').value, FABRICANTE: document.getElementById('CreateFab').value });" class="green waves-effect waves-light btn"><i class="material-icons left">check</i>Confirmar</button>
+                </div>
+            </div>
+            <br />
+            <br />
+            <ul class="collapsible popout ">
+                @foreach (var item in Model)
+                {
+                    <li class="z-depth-1">
+                        <div class="collapsible-header">
+                            <i class="material-icons">info</i>@Html.DisplayFor(modelItem => item.Nome)
+                        </div>
+                        <div class="collapsible-body">
+                            <div class="row">
+                                <label><b>Nome:</b> @item.Nome</label><br />
+                                <label><b>Categoria:</b> @item.Categoria.Nome</label><br />
+                                <label><b>Fabricante:</b> @item.Fabricante.Nome</label>
+                                <br />
+                                <br />
+                            </div>
+                            <div class="row">
+                                <button class="waves-effect waves-light btn orange modal-trigger" data-target="@item.ProdutoId.ToString()+Edit"><i class="material-icons left">edit</i>Editar</button>
+                                <button class="waves-effect waves-light btn red modal-trigger" data-target="@item.ProdutoId.ToString()+Delete"><i class="material-icons left">delete</i>Excluir</button>
+                            </div>
+                        </div>
+                        <!-- Modal Edit -->
+                        <div id="@item.ProdutoId.ToString()+Edit" class="modal">
+                            <div class="modal-content row">
+                                <h4 class="grey-text text-darken-2">Editar Fabricante</h4>
+                                <br />
+                                <br />
+                                <form class="col s12" id="form">
+                                    <div class="row">
+                                        <div class="input-field col s12">
+                                            <input id="EditNome.@item.ProdutoId" value="@item.Nome" type="text" class="validate">
+                                            <label for="Nome">Nome do Produto</label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="input-field col s6">
+                                            <select id="EditCat.@item.ProdutoId">
+                                                @foreach (var item1 in (List<Trabalho4_MVC.Models.Categoria>)@ViewBag.Categoria)
+                                                {
+                                                    if (item.CategoriaID == item1.CategoriaId)
+                                                    {
+                                                        <option selected value="@item1.CategoriaId">@item1.Nome</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item1.CategoriaId">@item1.Nome</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <label>Selecione</label>
+                                        </div>
+                                        <div class="input-field col s6">
+                                            <select id="EditFab.@item.ProdutoId">
+                                                <option value="" disabled >Selecione a opção</option>
+                                                @foreach (var item1 in (List<Trabalho4_MVC.Models.Fabricante>)@ViewBag.Fabricante)
+                                                {
+                                                    if (item.FabricanteID == item1.FabricanteID)
+                                                    {
+                                                        <option selected value="@item1.FabricanteID">@item1.Nome</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item1.FabricanteID">@item1.Nome</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <label>Selecione</label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="modal-footer">
+                                <button class="modal-action modal-close red waves-effect waves-light btn"><i class="material-icons left">cancel</i>Cancelar</button>
+                                <button onclick="sendPost('/Produtos/Edit', { ID: '@item.ProdutoId', NOME: document.getElementById('EditNome.'+@item.ProdutoId).value, CATEGORIA: document.getElementById('EditCat.'+@item.ProdutoId).value, FABRICANTE: document.getElementById('EditFab.'+@item.ProdutoId).value });" class="green waves-effect waves-light btn"><i class="material-icons left">check</i>Confirmar</button>
+                            </div>
+                        </div>
+                        <!-- Modal Delete -->
+                        <div id="@item.ProdutoId.ToString()+Delete" class="modal">
+                            <div class="modal-content row">
+                                <h4 class="grey-text text-darken-2">Excluir Produto</h4>
+                                <br />
+                                <br />
+                                <form class="col s12" id="form">
+                                    <div class="row">
+                                        <div class="input-field col s12">
+                                            <h6>Realmente deseja excluir o produto <b>@item.Nome</b>?</h6>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="modal-footer">
+                                <button class="modal-action modal-close red waves-effect waves-light btn"><i class="material-icons left">cancel</i>Cancelar</button>
+                                <button onclick="sendPost('/Produtos/Delete', { ID: '@item.ProdutoId'});" class="modal-action modal-close green waves-effect waves-light btn"><i class="material-icons left">check</i>Confirmar</button>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </main>
+    <!-- Footer -->
+    <footer class="page-footer blue darken-2">
+        <div class="container">
+            <div class="row">
+                <br />
+                <br />
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container center text-lighten-1">
+                &Copy Copyright 2018 - by Materialize
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

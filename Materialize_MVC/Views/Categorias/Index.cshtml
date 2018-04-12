@@ -1,0 +1,194 @@
+﻿@model IEnumerable<Trabalho4_MVC.Models.Categoria>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link type="text/css" rel="stylesheet" href="~/Content/css/materialize.css" media="screen,projection" />
+    <link type="text/css" rel="stylesheet" href="~/Content/css/custom.css" media="screen,projection" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="~/Content/js/materialize.js"></script>
+    <script>
+        //Função generica utilizada para acionar as operações Creat/Edit/Delete via post
+        if (!window.sendPost) {
+            window.sendPost = function (url, obj) {
+                //Define o formulário
+                var myForm = document.createElement("form")
+                myForm.action = url
+                myForm.method = "post"
+                var ok = false
+                //Esse for esta percorrente o elemento Json
+                for (var key in obj) {
+                    var input = document.createElement("input")
+                    input.type = "hidden"
+                    input.value = obj[key]
+                    input.name = key
+                    //Valida todos os campos
+                    if (obj[key] == "") {
+                        M.toast({ html: "Por favor, prencha o campo " + key })
+                        ok = true
+                        break
+                    }
+                    myForm.appendChild(input);
+                }
+                if (!ok) {
+                    //Adiciona o form ao corpo do documento
+                    document.body.appendChild(myForm)
+                    //Envia o formulário
+                    myForm.submit()
+                }
+            }
+        }
+        //Ativar Menu Mobile
+        $(document).ready(function () {
+            $('.sidenav').sidenav();
+            $('.collapsible').collapsible();
+            $('.modal').modal({
+                dismissible: false,
+                opacity: 0.9
+            });
+        });
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="blue darken-2">
+            <div class="container">
+                <div class="nav-wrapper">
+                    <!-- Menu-->
+                    <img src="~/Content/img/img.png" width="62px" />
+                    <a href="#" data-target="menu-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                    <ul class="right hide-on-med-and-down">
+                        <li><a href="/Produtos">Produtos</a></li>
+                        <li><a href="#">Categorias</a></li>
+                        <li><a href="/Fabricantes">Fabricantes</a></li>
+                    </ul>
+                    <!-- Menu mobile-->
+                    <ul class="sidenav" id="menu-mobile">
+                        <li><a href="/Produtos">Produtos</a></li>
+                        <li><a href="#">Categorias</a></li>
+                        <li><a href="/Fabricantes">Fabricantes</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <!-- Conteudo-->
+    <main class="grey lighten-5">
+        <div class="row container">
+            <br />
+            <br />
+            <a class="waves-effect waves-light btn blue darken-2 modal-trigger" data-target="Modal-Creat">
+                <i class="material-icons right">add</i>Nova Categoria
+            </a>
+            <!-- Modal Creat -->
+            <div id="Modal-Creat" class="modal">
+                <div class="modal-content row">
+                    <h4 class="grey-text text-darken-2">Nova Categoria</h4>
+                    <br />
+                    <br />
+                    <form class="col s12" id="form">
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input id="CreateNome" value="" type="text" class="validate">
+                                <label for="Nome">Nome da Categoria</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="divider"></div>
+                <div class="modal-footer">
+                    <button class="modal-action modal-close red waves-effect waves-light btn"><i class="material-icons left">cancel</i>Cancelar</button>
+                    <button onclick="sendPost('/Categorias/Create', { NOME: document.getElementById('CreateNome').value });" class="green waves-effect waves-light btn"><i class="material-icons left">check</i>Confirmar</button>
+                </div>
+            </div>
+            <br />
+            <br />
+            <ul class="collapsible popout ">
+                @foreach (var item in Model)
+                {
+                    <li class="z-depth-1">
+                        <div class="collapsible-header">
+                            <i class="material-icons">info</i>@Html.DisplayFor(modelItem => item.Nome)
+                        </div>
+                        <div class="collapsible-body">
+                            <div class="row">
+                                <label><b>Nome:</b> @item.Nome</label><br />
+                                <br />
+                                <br />
+                            </div>
+                            <div class="row">
+                                <button class="waves-effect waves-light btn orange modal-trigger" data-target="@item.CategoriaId.ToString()+Edit"><i class="material-icons left">edit</i>Editar</button>
+                                <button class="waves-effect waves-light btn red modal-trigger" data-target="@item.CategoriaId.ToString()+Delete"><i class="material-icons left">delete</i>Excluir</button>
+                            </div>
+                        </div>
+                        <!-- Modal Edit -->
+                        <div id="@item.CategoriaId.ToString()+Edit" class="modal">
+                            <div class="modal-content row">
+                                <h4 class="grey-text text-darken-2">Editar Categoria</h4>
+                                <br />
+                                <br />
+                                <form class="col s12" id="form">
+                                    <div class="row">
+                                        <div class="input-field col s12">
+                                            <input id="EditNome.@item.CategoriaId" value="@item.Nome" type="text" class="validate">
+                                            <label for="Nome" >Nome da Categoria</label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="modal-footer">
+                                <button class="modal-action modal-close red waves-effect waves-light btn"><i class="material-icons left">cancel</i>Cancelar</button>
+                                <button onclick="sendPost('/Categorias/Edit', { ID: '@item.CategoriaId', NOME: document.getElementById('EditNome.' + @item.CategoriaId).value });"  class="green waves-effect waves-light btn"><i class="material-icons left">check</i>Confirmar</button> 
+                            </div>
+                        </div>
+                        <!-- Modal Delete -->
+                        <div id="@item.CategoriaId.ToString()+Delete" class="modal">
+                            <div class="modal-content row">
+                                <h4 class="grey-text text-darken-2">Excluir Categoria</h4>
+                                <br />
+                                <br />
+                                <form class="col s12" id="form">
+                                    <div class="row">
+                                        <div class="input-field col s12">  
+                                            <h6>Realmente deseja excluir a categoria <b>@item.Nome</b>?</h6>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="modal-footer">
+                                <button  class="modal-action modal-close red waves-effect waves-light btn"><i class="material-icons left">cancel</i>Cancelar</button>
+                                <button onclick="sendPost('/Categorias/Delete', { ID: '@item.CategoriaId'});"  class="green waves-effect waves-light btn"><i class="material-icons left">check</i>Confirmar</button> 
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </main>
+    <!-- Footer -->
+    <footer class="page-footer blue darken-2">
+        <div class="container">
+            <div class="row">
+                <br/>
+                <br/>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container center text-lighten-1">
+                &Copy Copyright 2018 - by Materialize
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
